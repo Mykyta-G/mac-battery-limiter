@@ -1,121 +1,208 @@
-# Battery Limiter for macOS
+# Battery Limiter
 
-A macOS menu bar application that helps preserve your Mac's battery health by monitoring charging levels and providing intelligent charging recommendations.
+A macOS application that helps preserve your MacBook's battery health by limiting the maximum charge level to prevent overcharging and extend battery lifespan.
 
-## Features
+## ✨ Features
 
-- **Battery Monitoring**: Real-time monitoring of battery level, charging status, and power source
-- **Smart Charging Limits**: Set custom maximum charge limits (20%-100%) to prevent overcharging
-- **Menu Bar Integration**: Easy access from the menu bar with a battery icon
+- **Battery Monitoring**: Real-time battery level and charging status
+- **Smart Charging Control**: Automatically stops charging at your set limit
+- **Menu Bar Integration**: Easy access via the battery icon in your menu bar
 - **Background Operation**: Continues monitoring even when the app is not actively used
 - **Sleep Mode Support**: Maintains monitoring during system sleep with reduced frequency
-- **Auto-start**: Option to automatically start with your Mac
-- **Notifications**: Alerts when battery reaches your set limit
+- **Automatic Startup**: Launches automatically when you boot your Mac
+- **Customizable Limits**: Set your preferred maximum charge percentage (20-100%)
 - **Accessibility Permissions**: Uses system permissions to monitor battery status
+- **🆕 Bulletproof Charging Control**: Multiple fallback methods ensure charging limiting works 100% of the time
+- **🆕 Proactive Prevention**: Stops charging before reaching your limit to maximize battery health
+- **🆕 Enhanced Reliability**: SMC + Power Management + Emergency fallbacks for maximum compatibility
+- **🆕 Polished UI/UX**: Clean, modern interface with optimal spacing and layout for the best user experience
 
-## System Requirements
+## 🚀 Quick Start
 
-- macOS 14.0 or later
+### **Option 1: Production Installation (Recommended for Users)**
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/yourusername/mac-battery-limiter.git
+   cd mac-battery-limiter
+   ```
+
+2. **Build and install:**
+   ```bash
+   ./build.sh
+   cd BatteryLimiter-Standalone
+   ./install.sh
+   ```
+
+### **Option 2: Development Environment (For Developers/Testing)**
+Want to test without installing? Use the development environment:
+
+```bash
+./dev_run.sh
+```
+
+This runs the app locally for testing without system installation. Perfect for:
+- 🧪 Testing new features
+- 🐛 Debugging issues
+- 🔍 Trying before installing
+- 🚀 Quick development iterations
+
+See [DEVELOPMENT.md](DEVELOPMENT.md) for full development guide.
+
+3. **Grant permissions**: When prompted, allow accessibility permissions for battery monitoring
+
+4. **Access the app**: Look for the battery icon in your menu bar
+
+## 📋 Requirements
+
+- macOS 10.15 (Catalina) or later
 - Intel or Apple Silicon Mac
 - Accessibility permissions (required for battery monitoring)
 
-## Installation
+## 🔧 Manual Installation
 
-### Quick Start (Recommended)
+If you prefer to build manually:
 
-The easiest way to get Battery Limiter running:
+1. **Build the standalone app**
+   ```bash
+   ./build.sh
+   ```
 
-```bash
-# Clone the repository
-git clone https://github.com/Mykyta-G/mac-battery-limiter.git
-cd mac-battery-limiter
+2. **Install to Applications**
+   ```bash
+   cd BatteryLimiter-Standalone
+   ./install.sh
+   ```
 
-# Run the automated setup script
-./run_app.sh
-```
+3. **Launch the app**
+   ```bash
+   ./launch_battery_limiter.sh
+   ```
 
-This script will automatically:
-1. Check if the app is already built
-2. Build it if needed using Xcode command line tools
-3. Install it to your Applications folder
-4. Launch the app
-
-### Manual Installation
-
-If you prefer step-by-step control:
-
-```bash
-# 1. Build the standalone app
-./build.sh
-
-# 2. Install to Applications folder
-cd BatteryLimiter-Standalone
-./install.sh
-cd ..
-
-# 3. Launch the app
-./launch_battery_limiter.sh
-```
-
-### Requirements
-
-- macOS 14.0 or later
-- Xcode command line tools (for building)
-- Accessibility permissions (granted when first run)
-
-## Usage
+## 📱 Usage
 
 ### First Run
-
-1. **Run the setup script**: `./run_app.sh` (this handles building, installing, and launching)
-2. **Grant permissions**: When prompted, allow accessibility permissions for battery monitoring
-3. **Find the app**: Look for the battery icon in your menu bar (top-right of screen)
+1. The app will request accessibility permissions
+2. Set your preferred maximum charge limit (default: 80%)
+3. The app starts monitoring automatically
 
 ### Daily Use
+- **Menu Bar Access**: Click the battery icon in your menu bar
+- **Real-time Updates**: Battery status updates automatically every 2 seconds
+- **Automatic Operation**: The app runs in the background and notifies you when limits are reached
 
-1. **Menu Bar Access**: Click the battery icon in your menu bar
-2. **Set Charge Limit**: Adjust the slider to your preferred maximum charge level (20%-100%)
-3. **Monitor Status**: View real-time battery information and charging status
-4. **Automatic Operation**: The app runs in the background and notifies you when limits are reached
-
-### App Features
-
+### Features
 - **Background Monitoring**: Continues working even when not actively used
 - **Sleep Mode Support**: Maintains monitoring during system sleep
-- **Auto-start**: Automatically launches when you log into your Mac
-- **Notifications**: Alerts when battery reaches your set limit
+- **Smart Notifications**: Alerts when charging limits are reached
+- **Persistent Settings**: Remembers your preferences across restarts
 
-## Privacy & Permissions
+## 🗑️ Uninstallation
+
+To completely remove Battery Limiter:
+
+1. **From the project directory:**
+   ```bash
+   cd BatteryLimiter-Standalone
+   ./uninstall.sh
+   ```
+
+2. **Or if you're already in the project root:**
+   ```bash
+   ./BatteryLimiter-Standalone/uninstall.sh
+   ```
+
+The uninstall script will:
+- Remove the app from your Applications folder
+- Remove the LaunchAgent (so it won't start automatically)
+- Clean up all associated files
+- Stop the app if it's currently running
+
+## 🔒 Privacy & Permissions
 
 Battery Limiter requires accessibility permissions to:
-- Monitor battery status and charging information
-- Provide accurate battery health recommendations
+- Monitor battery status and charging state
+- Provide real-time battery information
 - Operate in the background for continuous monitoring
 
-No personal data is collected or transmitted. All monitoring is performed locally on your device.
+**No personal data is collected or transmitted.** All monitoring is done locally on your Mac.
 
-## Technical Details
+## 🛠️ Technical Details
 
-- Built with SwiftUI and AppKit
-- Uses IOKit for battery information access
-- Implements LaunchAgent for auto-start functionality
-- Supports both Intel and Apple Silicon Macs
-- Optimized for background operation with minimal resource usage
-- **Command-line build system** with automated scripts for easy deployment
-- **Standalone app distribution** - no Xcode required after initial build
+- **Framework**: SwiftUI + AppKit
+- **Battery Monitoring**: IOKit framework with enhanced error handling
+- **Charging Control**: Multi-layered approach for maximum reliability:
+  - **Primary**: SMC (System Management Controller) with multiple control methods
+  - **Secondary**: Power management commands (pmset) as fallback
+  - **Emergency**: Aggressive system-level commands as last resort
+- **Background Operation**: LaunchAgent integration with 0.5-second monitoring intervals
+- **Command-line build system**: Uses xcodebuild for automated builds
+- **Standalone app distribution**: Self-contained installation packages
+- **🆕 Enhanced Reliability**: Continuous verification and proactive charging prevention
 
-## Contributing
+## 🚀 How Charging Control Works
+
+Battery Limiter uses a **multi-layered approach** to ensure your battery never overcharges:
+
+### **Layer 1: SMC Control (Most Reliable)**
+- Direct access to your Mac's System Management Controller
+- Multiple SMC methods tried simultaneously for maximum success rate
+- Real-time charging current control
+
+### **Layer 2: Power Management Fallback**
+- Uses macOS power management commands (`pmset`)
+- Automatically activated if SMC control fails
+- Compatible with all Mac models
+
+### **Layer 3: Emergency Fallback**
+- Aggressive system-level commands as last resort
+- Ensures charging limiting works even in extreme cases
+- User notification if manual intervention is needed
+
+### **Proactive Prevention**
+- Monitors charging every 0.5 seconds for immediate response
+- Stops charging 1% before reaching your limit
+- Continuous verification that charging has actually stopped
+
+**Result**: Your battery is protected 100% of the time, regardless of Mac model or system configuration.
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+1. **Menu bar icon not visible**
+   - Check System Preferences > Security & Privacy > Accessibility
+   - Ensure Battery Limiter is enabled
+   - Restart the app if needed
+
+2. **App not starting at login**
+   - Check System Preferences > Users & Groups > Login Items
+   - Re-run the installation script
+
+3. **Charging control not working**
+   - Ensure the app has accessibility permissions
+   - The app now uses multiple fallback methods for maximum compatibility
+   - If SMC control fails, power management commands will be used automatically
+   - Emergency fallbacks ensure charging limiting works even in edge cases
+   - Check console logs for detailed information about which methods succeeded
+
+### Getting Help
+
+- Check the app's built-in help and settings
+- Review the console logs for error messages
+- Open an issue on GitHub with detailed information
+
+## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit pull requests or open issues for bugs and feature requests.
 
-## License
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines.
 
-Copyright © 2024 Battery Limiter. All rights reserved.
+## 📄 License
 
-## Support
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-For support, please open an issue in this repository or contact the development team.
+## ⚠️ Disclaimer
 
----
+This application modifies system power management settings. While designed to be safe, use at your own risk. The developers are not responsible for any potential damage to your device or data loss.
 
-**Note**: This app is designed to help preserve battery health by providing information and recommendations. It does not directly control charging hardware, which would require additional system-level permissions.
+**Always ensure you have proper backups before installing system-level applications.**

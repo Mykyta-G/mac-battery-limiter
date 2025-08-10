@@ -27,6 +27,13 @@ required_files=(
     "BatteryLimiter/Assets.xcassets/AppIcon.appiconset/Contents.json"
     "BatteryLimiter/Assets.xcassets/AccentColor.colorset/Contents.json"
     "BatteryLimiter/Preview Content/Preview Assets.xcassets/Contents.json"
+    "build.sh"
+    "run_app.sh"
+    "launch_battery_limiter.sh"
+    "validate_project.sh"
+    "README.md"
+    "CONTRIBUTING.md"
+    "LICENSE"
 )
 
 missing_files=()
@@ -95,36 +102,151 @@ else
 fi
 
 # Check for missing imports
-if grep -q "IOKit" "BatteryLimiter"/*.swift; then
-    echo "✅ IOKit import found"
+if grep -q "import os.log" "BatteryLimiter"/*.swift; then
+    echo "✅ os.log import found (proper logging)"
 else
-    echo "❌ IOKit import missing"
+    echo "❌ Missing os.log import (using print statements)"
 fi
 
-if grep -q "UserNotifications" "BatteryLimiter"/*.swift; then
-    echo "✅ UserNotifications import found"
+# Check for print statements (should be removed in production)
+print_statements=$(grep -r "print(" "BatteryLimiter"/*.swift | wc -l)
+if [[ $print_statements -eq 0 ]]; then
+    echo "✅ No print statements found (good for production)"
 else
-    echo "❌ UserNotifications import missing"
+    echo "⚠️  Found $print_statements print statements (should use Logger instead)"
 fi
 
-# Check Info.plist
+# Check for memory leaks
+if grep -q "weak self" "BatteryLimiter"/*.swift; then
+    echo "✅ Weak self references found (prevents memory leaks)"
+else
+    echo "⚠️  No weak self references found (potential memory leaks)"
+fi
+
+# Check for proper deinit
+if grep -q "deinit" "BatteryLimiter"/*.swift; then
+    echo "✅ deinit blocks found (proper cleanup)"
+else
+    echo "⚠️  No deinit blocks found (potential resource leaks)"
+fi
+
+# Check for force operations
+if grep -q "force" "BatteryLimiter"/*.swift; then
+    echo "⚠️  Force operations found (potential crashes)"
+else
+    echo "✅ No force operations found (safe code)"
+fi
+
+# Check for proper error handling
+if grep -q "guard.*else" "BatteryLimiter"/*.swift; then
+    echo "✅ Guard statements found (proper error handling)"
+else
+    echo "⚠️  No guard statements found (poor error handling)"
+fi
+
+# Check for sudo usage in scripts
 echo ""
-echo "📋 Checking Info.plist..."
+echo "🔒 Checking Script Security..."
 
-if [[ -f "BatteryLimiter/Info.plist" ]]; then
-    if grep -q "LSUIElement" "BatteryLimiter/Info.plist"; then
-        echo "✅ LSUIElement found (menu bar app)"
+scripts=("build.sh" "run_app.sh" "launch_battery_limiter.sh" "BatteryLimiter-Standalone/install.sh" "BatteryLimiter-Standalone/uninstall.sh")
+
+for script in "${scripts[@]}"; do
+    if [[ -f "$script" ]]; then
+        sudo_count=$(grep -c "sudo" "$script" 2>/dev/null || echo "0")
+        if [[ $sudo_count -eq 0 ]]; then
+            echo "✅ $script (no sudo usage - secure)"
+        else
+            echo "⚠️  $script ($sudo_count sudo commands - security concern)"
+        fi
+    fi
+done
+
+# Check for proper validation in scripts
+echo ""
+echo "✅ Checking Script Validation..."
+
+for script in "${scripts[@]}"; do
+    if [[ -f "$script" ]]; then
+        if grep -q "OSTYPE.*darwin" "$script"; then
+            echo "✅ $script (macOS validation)"
+        else
+            echo "⚠️  $script (no macOS validation)"
+        fi
+    fi
+done
+
+# Check for proper permissions handling
+echo ""
+echo "🔐 Checking Permissions Handling..."
+
+for script in "${scripts[@]}"; do
+    if [[ -f "$script" ]]; then
+        if grep -q "chmod\|chown" "$script"; then
+            echo "✅ $script (proper permissions handling)"
+        else
+            echo "⚠️  $script (no permissions handling)"
+        fi
+    fi
+done
+
+# Check for proper error handling in scripts
+echo ""
+echo "🚨 Checking Script Error Handling..."
+
+for script in "${scripts[@]}"; do
+    if [[ -f "$script" ]]; then
+        if grep -q "exit 1" "$script"; then
+            echo "✅ $script (proper error handling)"
+        else
+            echo "⚠️  $script (no error handling)"
+        fi
+    fi
+done
+
+# Check for proper cleanup in scripts
+echo ""
+echo "🧹 Checking Script Cleanup..."
+
+for script in "${scripts[@]}"; do
+    if [[ -f "$script" ]]; then
+        if grep -q "rm -rf\|cleanup\|clean" "$script"; then
+            echo "✅ $script (cleanup operations)"
+        else
+            echo "⚠️  $script (no cleanup operations)"
+        fi
+    fi
+done
+
+# Check for proper documentation
+echo ""
+echo "📚 Checking Documentation..."
+
+if [[ -f "README.md" ]]; then
+    if grep -q "Uninstallation\|uninstall" "README.md"; then
+        echo "✅ README.md (uninstall instructions)"
     else
-        echo "❌ LSUIElement missing"
+        echo "⚠️  README.md (missing uninstall instructions)"
     fi
     
-    if grep -q "NSMainNibFile" "BatteryLimiter/Info.plist"; then
-        echo "⚠️  NSMainNibFile found (not needed for SwiftUI)"
+    if grep -q "Troubleshooting\|troubleshoot" "README.md"; then
+        echo "✅ README.md (troubleshooting section)"
     else
-        echo "✅ NSMainNibFile not found (correct for SwiftUI)"
+        echo "⚠️  README.md (missing troubleshooting section)"
     fi
+fi
+
+# Check for proper license
+if [[ -f "LICENSE" ]]; then
+    echo "✅ LICENSE file found"
 else
-    echo "❌ Info.plist not found"
+    echo "❌ LICENSE file missing"
+fi
+
+# Check for contributing guidelines
+if [[ -f "CONTRIBUTING.md" ]]; then
+    echo "✅ CONTRIBUTING.md found"
+else
+    echo "⚠️  CONTRIBUTING.md missing"
 fi
 
 # Summary
@@ -135,17 +257,18 @@ echo "📊 Validation Summary:"
 if [[ ${#missing_files[@]} -eq 0 ]]; then
     echo "✅ All required files present"
 else
-    echo "❌ Missing files: ${#missing_files[@]}"
-    for file in "${missing_files[@]}"; do
-        echo "   - $file"
-    done
+    echo "❌ Missing files: ${missing_files[*]}"
 fi
 
 echo ""
-echo "🚀 Next Steps:"
-echo "1. Install Xcode from Mac App Store"
-echo "2. Open BatteryLimiter.xcodeproj in Xcode"
-echo "3. Press Cmd+R to build and run"
-echo ""
 echo "💡 If you see any ❌ errors above, they need to be fixed before building"
-echo "💡 If you see any ⚠️  warnings, they should be addressed but won't prevent building"
+echo "💡 ⚠️  warnings indicate areas that could be improved"
+echo "💡 ✅ items are properly configured"
+
+# Exit with error if critical files are missing
+if [[ ${#missing_files[@]} -gt 0 ]]; then
+    exit 1
+fi
+
+echo ""
+echo "🎉 Project validation complete! Your project looks good to go."

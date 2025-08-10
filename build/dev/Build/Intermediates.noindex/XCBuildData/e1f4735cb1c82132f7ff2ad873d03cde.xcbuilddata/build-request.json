@@ -1,0 +1,67 @@
+{
+  "buildCommand" : {
+    "command" : "build",
+    "skipDependencies" : false,
+    "style" : "buildOnly"
+  },
+  "configuredTargets" : [
+    {
+      "guid" : "ed204a73289e33c6ecd37606c1967ccb9f9446f00221f65dc1596a41cbb468bf"
+    }
+  ],
+  "containerPath" : "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/BatteryLimiter.xcodeproj",
+  "continueBuildingAfterErrors" : false,
+  "dependencyScope" : "workspace",
+  "enableIndexBuildArena" : false,
+  "hideShellScriptEnvironment" : false,
+  "parameters" : {
+    "action" : "build",
+    "activeArchitecture" : "x86_64",
+    "activeRunDestination" : {
+      "disableOnlyActiveArch" : false,
+      "platform" : "macosx",
+      "sdk" : "macosx15.5",
+      "sdkVariant" : "macos",
+      "supportedArchitectures" : [
+        "x86_64h",
+        "x86_64"
+      ],
+      "targetArchitecture" : "x86_64"
+    },
+    "arenaInfo" : {
+      "buildIntermediatesPath" : "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/build/dev/Build/Intermediates.noindex",
+      "buildProductsPath" : "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/build/dev/Build/Products",
+      "derivedDataPath" : "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/build/dev",
+      "indexDataStoreFolderPath" : "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/build/dev/Index.noindex/DataStore",
+      "indexEnableDataStore" : true,
+      "indexPCHPath" : "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/build/dev/Index.noindex/PrecompiledHeaders",
+      "pchPath" : "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/build/dev/Build/Intermediates.noindex/PrecompiledHeaders"
+    },
+    "configurationName" : "Debug",
+    "overrides" : {
+      "commandLine" : {
+        "table" : {
+          "CODE_SIGN_IDENTITY" : "",
+          "CODE_SIGNING_ALLOWED" : "NO",
+          "CODE_SIGNING_REQUIRED" : "NO"
+        }
+      },
+      "synthesized" : {
+        "table" : {
+          "ACTION" : "build",
+          "COLOR_DIAGNOSTICS" : "YES",
+          "diagnostic_message_length" : "80",
+          "ENABLE_PREVIEWS" : "NO",
+          "ENABLE_XOJIT_PREVIEWS" : "YES",
+          "ONLY_ACTIVE_ARCH" : "YES"
+        }
+      }
+    }
+  },
+  "schemeCommand" : "launch",
+  "showNonLoggedProgress" : true,
+  "useDryRun" : false,
+  "useImplicitDependencies" : true,
+  "useLegacyBuildLocations" : false,
+  "useParallelTargets" : true
+}

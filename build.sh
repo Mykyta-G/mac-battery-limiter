@@ -3,9 +3,22 @@
 echo "🔋 Building Battery Limiter Standalone App..."
 echo "=============================================="
 
+# Check if we're on macOS
+if [[ "$OSTYPE" != "darwin"* ]]; then
+    echo "❌ Error: This script must be run on macOS"
+    exit 1
+fi
+
 # Check if Xcode is installed
 if ! command -v xcodebuild &> /dev/null; then
     echo "❌ Error: xcodebuild not found. Please install Xcode first."
+    echo "💡 Run: xcode-select --install"
+    exit 1
+fi
+
+# Check if we have write permissions to the current directory
+if [[ ! -w "." ]]; then
+    echo "❌ Error: No write permission in current directory"
     exit 1
 fi
 
@@ -40,6 +53,12 @@ if [ $? -eq 0 ]; then
 echo "🔋 Installing Battery Limiter..."
 echo "================================"
 
+# Check if we're on macOS
+if [[ "$OSTYPE" != "darwin"* ]]; then
+    echo "❌ Error: This script must be run on macOS"
+    exit 1
+fi
+
 # Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 APP_PATH="$SCRIPT_DIR/BatteryLimiter.app"
@@ -52,16 +71,29 @@ fi
 # Check if app is already installed
 if [ -d "/Applications/BatteryLimiter.app" ]; then
     echo "⚠️  Battery Limiter is already installed. Removing old version..."
-    sudo rm -rf "/Applications/BatteryLimiter.app"
+    
+    # Check if we have permission to remove from Applications
+    if [[ ! -w "/Applications" ]]; then
+        echo "❌ Error: No permission to write to /Applications folder"
+        echo "💡 Please run with sudo or check your permissions"
+        exit 1
+    fi
+    
+    rm -rf "/Applications/BatteryLimiter.app"
 fi
 
 # Install the app
 echo "📦 Installing Battery Limiter to Applications..."
-sudo cp -R "$APP_PATH" "/Applications/"
+cp -R "$APP_PATH" "/Applications/"
 
-# Set proper permissions
-sudo chown -R root:wheel "/Applications/BatteryLimiter.app"
-sudo chmod -R 755 "/Applications/BatteryLimiter.app"
+# Set proper permissions (only if we have admin access)
+if [[ -w "/Applications/BatteryLimiter.app" ]]; then
+    echo "🔐 Setting proper permissions..."
+    chown -R "$(whoami):staff" "/Applications/BatteryLimiter.app"
+    chmod -R 755 "/Applications/BatteryLimiter.app"
+else
+    echo "⚠️  Could not set permissions - app may need to be moved manually"
+fi
 
 echo "✅ Installation complete!"
 echo ""
@@ -73,8 +105,7 @@ echo "💡 The app will automatically start at login and run in the background."
 echo "   Look for the battery icon in your menu bar!"
 echo ""
 echo "🔧 To uninstall:"
-echo "   sudo rm -rf /Applications/BatteryLimiter.app"
-echo "   rm -rf ~/Library/LaunchAgents/com.batterylimiter.plist"
+echo "   ./uninstall.sh"
 EOF
 
         # Make install script executable
@@ -87,24 +118,45 @@ EOF
 echo "🗑️  Uninstalling Battery Limiter..."
 echo "=================================="
 
+# Check if we're on macOS
+if [[ "$OSTYPE" != "darwin"* ]]; then
+    echo "❌ Error: This script must be run on macOS"
+    exit 1
+fi
+
 # Remove the app
 if [ -d "/Applications/BatteryLimiter.app" ]; then
     echo "📦 Removing BatteryLimiter.app..."
-    sudo rm -rf "/Applications/BatteryLimiter.app"
+    
+    # Check if we have permission to remove from Applications
+    if [[ ! -w "/Applications" ]]; then
+        echo "❌ Error: No permission to write to /Applications folder"
+        echo "💡 Please run with sudo or check your permissions"
+        exit 1
+    fi
+    
+    rm -rf "/Applications/BatteryLimiter.app"
+    echo "✅ App removed successfully"
+else
+    echo "ℹ️  App not found in Applications folder"
 fi
 
 # Remove launch agent
-LAUNCH_AGENT_PATH="$HOME/Library/LaunchAgents/com.batterylimiter.plist"
+LAUNCH_AGENT_PATH="$HOME/Library/LaunchAgents/com.batterylimiter.app.plist"
 if [ -f "$LAUNCH_AGENT_PATH" ]; then
     echo "🔌 Removing launch agent..."
     
     # Unload the launch agent first
-    launchctl unload "$LAUNCH_AGENT_PATH" 2>/dev/null
+    launchctl unload "$LAUNCH_AGENT_PATH" 2>/dev/null || true
     
     # Remove the plist file
     rm -f "$LAUNCH_AGENT_PATH"
+    echo "✅ Launch agent removed successfully"
+else
+    echo "ℹ️  Launch agent not found"
 fi
 
+echo ""
 echo "✅ Uninstallation complete!"
 echo "💡 You may need to restart your Mac for all changes to take effect."
 EOF
@@ -112,7 +164,7 @@ EOF
         # Make uninstall script executable
         chmod +x "$STANDALONE_DIR/uninstall.sh"
         
-        # Create README
+        # Create README for standalone
         cat > "$STANDALONE_DIR/README.md" << 'EOF'
 # Battery Limiter - Standalone Installation
 
@@ -130,7 +182,7 @@ Battery Limiter is a macOS app that helps preserve your MacBook's battery health
 
 ### Option 1: Automatic Installation (Recommended)
 1. Double-click `install.sh` in this folder
-2. Enter your password when prompted
+2. Enter your password when prompted (if needed)
 3. The app will be installed to your Applications folder
 4. Launch the app from Applications or it will start automatically at login
 
@@ -162,20 +214,17 @@ Run `uninstall.sh` to completely remove the app and all associated files.
 For issues or questions, check the app's built-in help or contact support.
 EOF
 
-        echo "✅ Standalone app created successfully!"
+        echo "✅ Standalone app package created successfully!"
         echo ""
-        echo "📁 Your standalone app is ready in: $STANDALONE_DIR"
-        echo ""
-        echo "🚀 To install:"
-        echo "   cd $STANDALONE_DIR"
-        echo "   ./install.sh"
-        echo ""
-        echo "💡 The app will run independently without Xcode!"
+        echo "📁 Files created in: $STANDALONE_DIR"
+        echo "🔧 To install: cd $STANDALONE_DIR && ./install.sh"
+        echo "🗑️  To uninstall: cd $STANDALONE_DIR && ./uninstall.sh"
         
     else
-        echo "❌ Could not find the built app. Please check the build output above."
+        echo "❌ Error: Built app not found. Build may have failed."
         exit 1
     fi
+    
 else
     echo "❌ Build failed. Please check for errors in Xcode."
     exit 1

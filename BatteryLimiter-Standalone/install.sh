@@ -3,6 +3,12 @@
 echo "🔋 Installing Battery Limiter..."
 echo "================================"
 
+# Check if we're on macOS
+if [[ "$OSTYPE" != "darwin"* ]]; then
+    echo "❌ Error: This script must be run on macOS"
+    exit 1
+fi
+
 # Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 APP_PATH="$SCRIPT_DIR/BatteryLimiter.app"
@@ -15,16 +21,29 @@ fi
 # Check if app is already installed
 if [ -d "/Applications/BatteryLimiter.app" ]; then
     echo "⚠️  Battery Limiter is already installed. Removing old version..."
-    sudo rm -rf "/Applications/BatteryLimiter.app"
+    
+    # Check if we have permission to remove from Applications
+    if [[ ! -w "/Applications" ]]; then
+        echo "❌ Error: No permission to write to /Applications folder"
+        echo "💡 Please run with sudo or check your permissions"
+        exit 1
+    fi
+    
+    rm -rf "/Applications/BatteryLimiter.app"
 fi
 
 # Install the app
 echo "📦 Installing Battery Limiter to Applications..."
-sudo cp -R "$APP_PATH" "/Applications/"
+cp -R "$APP_PATH" "/Applications/"
 
-# Set proper permissions
-sudo chown -R root:wheel "/Applications/BatteryLimiter.app"
-sudo chmod -R 755 "/Applications/BatteryLimiter.app"
+# Set proper permissions (only if we have admin access)
+if [[ -w "/Applications/BatteryLimiter.app" ]]; then
+    echo "🔐 Setting proper permissions..."
+    chown -R "$(whoami):staff" "/Applications/BatteryLimiter.app"
+    chmod -R 755 "/Applications/BatteryLimiter.app"
+else
+    echo "⚠️  Could not set permissions - app may need to be moved manually"
+fi
 
 echo "✅ Installation complete!"
 echo ""
@@ -36,5 +55,4 @@ echo "💡 The app will automatically start at login and run in the background."
 echo "   Look for the battery icon in your menu bar!"
 echo ""
 echo "🔧 To uninstall:"
-echo "   sudo rm -rf /Applications/BatteryLimiter.app"
-echo "   rm -rf ~/Library/LaunchAgents/com.batterylimiter.plist"
+echo "   ./uninstall.sh"

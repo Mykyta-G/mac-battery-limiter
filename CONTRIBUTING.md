@@ -14,7 +14,7 @@ Thank you for your interest in contributing to Battery Limiter! This document pr
 1. **Fork** the repository on GitHub
 2. **Clone** your fork locally:
    ```bash
-   git clone https://github.com/yourusername/battery-limiter.git
+   git clone https://github.com/Mykyta-G/mac-battery-limiter.git
    cd battery-limiter
    ```
 3. **Open** the project in Xcode:

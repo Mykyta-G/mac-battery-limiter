@@ -1,0 +1,184 @@
+{
+  "source": "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/BatteryLimiter/ContentView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Battery Limiter",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 18
+        }
+      },
+      {
+        "comment": "",
+        "key": "Last updated: %@",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 102
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld%%",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 63
+        }
+      },
+      {
+        "comment": "",
+        "key": "Battery Level",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 67
+        }
+      },
+      {
+        "comment": "",
+        "key": "Monitoring Active",
+        "location": {
+          "startingColumn": 56,
+          "startingLine": 95
+        }
+      },
+      {
+        "comment": "",
+        "key": "Monitoring Inactive",
+        "location": {
+          "startingColumn": 78,
+          "startingLine": 95
+        }
+      },
+      {
+        "comment": "",
+        "key": "Max Charge Limit",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 116
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld%%",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 120
+        }
+      },
+      {
+        "comment": "",
+        "key": "20%",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 133
+        }
+      },
+      {
+        "comment": "",
+        "key": "100%",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 137
+        }
+      },
+      {
+        "comment": "",
+        "key": "Charge limit reached!",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 148
+        }
+      },
+      {
+        "comment": "",
+        "key": "Charging will be stopped automatically.",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 152
+        }
+      },
+      {
+        "comment": "",
+        "key": "© 2025 Battery Limiter",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 192
+        }
+      },
+      {
+        "comment": "",
+        "key": "Stop Monitoring",
+        "location": {
+          "startingColumn": 60,
+          "startingLine": 182
+        }
+      },
+      {
+        "comment": "",
+        "key": "Start Monitoring",
+        "location": {
+          "startingColumn": 80,
+          "startingLine": 182
+        }
+      },
+      {
+        "comment": "",
+        "key": "Settings",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 287
+        }
+      },
+      {
+        "comment": "",
+        "key": "Battery Settings",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 267
+        }
+      },
+      {
+        "comment": "",
+        "key": "Information",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 281
+        }
+      },
+      {
+        "comment": "",
+        "key": "Max Charge Limit",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 269
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld%%",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 271
+        }
+      },
+      {
+        "comment": "",
+        "key": "This app helps preserve your Mac's battery health by monitoring charging levels and suggesting when to unplug.",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 282
+        }
+      },
+      {
+        "comment": "",
+        "key": "Done",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 290
+        }
+      }
+    ]
+  },
+  "version": 1
+}

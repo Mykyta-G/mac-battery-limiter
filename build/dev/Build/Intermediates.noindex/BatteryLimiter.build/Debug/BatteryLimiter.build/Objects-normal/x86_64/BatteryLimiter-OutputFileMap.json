@@ -1,0 +1,48 @@
+{
+  "" : {
+    "diagnostics" : "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/build/dev/Build/Intermediates.noindex/BatteryLimiter.build/Debug/BatteryLimiter.build/Objects-normal/x86_64/BatteryLimiter-master.dia",
+    "emit-module-dependencies" : "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/build/dev/Build/Intermediates.noindex/BatteryLimiter.build/Debug/BatteryLimiter.build/Objects-normal/x86_64/BatteryLimiter-master-emit-module.d",
+    "emit-module-diagnostics" : "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/build/dev/Build/Intermediates.noindex/BatteryLimiter.build/Debug/BatteryLimiter.build/Objects-normal/x86_64/BatteryLimiter-master-emit-module.dia",
+    "swift-dependencies" : "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/build/dev/Build/Intermediates.noindex/BatteryLimiter.build/Debug/BatteryLimiter.build/Objects-normal/x86_64/BatteryLimiter-master.swiftdeps"
+  },
+  "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/BatteryLimiter/BatteryLimiterApp.swift" : {
+    "const-values" : "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/build/dev/Build/Intermediates.noindex/BatteryLimiter.build/Debug/BatteryLimiter.build/Objects-normal/x86_64/BatteryLimiterApp.swiftconstvalues",
+    "dependencies" : "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/build/dev/Build/Intermediates.noindex/BatteryLimiter.build/Debug/BatteryLimiter.build/Objects-normal/x86_64/BatteryLimiterApp.d",
+    "diagnostics" : "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/build/dev/Build/Intermediates.noindex/BatteryLimiter.build/Debug/BatteryLimiter.build/Objects-normal/x86_64/BatteryLimiterApp.dia",
+    "index-unit-output-path" : "/BatteryLimiter.build/Debug/BatteryLimiter.build/Objects-normal/x86_64/BatteryLimiterApp.o",
+    "llvm-bc" : "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/build/dev/Build/Intermediates.noindex/BatteryLimiter.build/Debug/BatteryLimiter.build/Objects-normal/x86_64/BatteryLimiterApp.bc",
+    "object" : "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/build/dev/Build/Intermediates.noindex/BatteryLimiter.build/Debug/BatteryLimiter.build/Objects-normal/x86_64/BatteryLimiterApp.o",
+    "swift-dependencies" : "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/build/dev/Build/Intermediates.noindex/BatteryLimiter.build/Debug/BatteryLimiter.build/Objects-normal/x86_64/BatteryLimiterApp.swiftdeps",
+    "swiftmodule" : "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/build/dev/Build/Intermediates.noindex/BatteryLimiter.build/Debug/BatteryLimiter.build/Objects-normal/x86_64/BatteryLimiterApp~partial.swiftmodule"
+  },
+  "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/BatteryLimiter/BatteryMonitor.swift" : {
+    "const-values" : "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/build/dev/Build/Intermediates.noindex/BatteryLimiter.build/Debug/BatteryLimiter.build/Objects-normal/x86_64/BatteryMonitor.swiftconstvalues",
+    "dependencies" : "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/build/dev/Build/Intermediates.noindex/BatteryLimiter.build/Debug/BatteryLimiter.build/Objects-normal/x86_64/BatteryMonitor.d",
+    "diagnostics" : "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/build/dev/Build/Intermediates.noindex/BatteryLimiter.build/Debug/BatteryLimiter.build/Objects-normal/x86_64/BatteryMonitor.dia",
+    "index-unit-output-path" : "/BatteryLimiter.build/Debug/BatteryLimiter.build/Objects-normal/x86_64/BatteryMonitor.o",
+    "llvm-bc" : "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/build/dev/Build/Intermediates.noindex/BatteryLimiter.build/Debug/BatteryLimiter.build/Objects-normal/x86_64/BatteryMonitor.bc",
+    "object" : "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/build/dev/Build/Intermediates.noindex/BatteryLimiter.build/Debug/BatteryLimiter.build/Objects-normal/x86_64/BatteryMonitor.o",
+    "swift-dependencies" : "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/build/dev/Build/Intermediates.noindex/BatteryLimiter.build/Debug/BatteryLimiter.build/Objects-normal/x86_64/BatteryMonitor.swiftdeps",
+    "swiftmodule" : "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/build/dev/Build/Intermediates.noindex/BatteryLimiter.build/Debug/BatteryLimiter.build/Objects-normal/x86_64/BatteryMonitor~partial.swiftmodule"
+  },
+  "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/BatteryLimiter/ContentView.swift" : {
+    "const-values" : "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/build/dev/Build/Intermediates.noindex/BatteryLimiter.build/Debug/BatteryLimiter.build/Objects-normal/x86_64/ContentView.swiftconstvalues",
+    "dependencies" : "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/build/dev/Build/Intermediates.noindex/BatteryLimiter.build/Debug/BatteryLimiter.build/Objects-normal/x86_64/ContentView.d",
+    "diagnostics" : "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/build/dev/Build/Intermediates.noindex/BatteryLimiter.build/Debug/BatteryLimiter.build/Objects-normal/x86_64/ContentView.dia",
+    "index-unit-output-path" : "/BatteryLimiter.build/Debug/BatteryLimiter.build/Objects-normal/x86_64/ContentView.o",
+    "llvm-bc" : "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/build/dev/Build/Intermediates.noindex/BatteryLimiter.build/Debug/BatteryLimiter.build/Objects-normal/x86_64/ContentView.bc",
+    "object" : "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/build/dev/Build/Intermediates.noindex/BatteryLimiter.build/Debug/BatteryLimiter.build/Objects-normal/x86_64/ContentView.o",
+    "swift-dependencies" : "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/build/dev/Build/Intermediates.noindex/BatteryLimiter.build/Debug/BatteryLimiter.build/Objects-normal/x86_64/ContentView.swiftdeps",
+    "swiftmodule" : "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/build/dev/Build/Intermediates.noindex/BatteryLimiter.build/Debug/BatteryLimiter.build/Objects-normal/x86_64/ContentView~partial.swiftmodule"
+  },
+  "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/build/dev/Build/Intermediates.noindex/BatteryLimiter.build/Debug/BatteryLimiter.build/DerivedSources/GeneratedAssetSymbols.swift" : {
+    "const-values" : "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/build/dev/Build/Intermediates.noindex/BatteryLimiter.build/Debug/BatteryLimiter.build/Objects-normal/x86_64/GeneratedAssetSymbols.swiftconstvalues",
+    "dependencies" : "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/build/dev/Build/Intermediates.noindex/BatteryLimiter.build/Debug/BatteryLimiter.build/Objects-normal/x86_64/GeneratedAssetSymbols.d",
+    "diagnostics" : "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/build/dev/Build/Intermediates.noindex/BatteryLimiter.build/Debug/BatteryLimiter.build/Objects-normal/x86_64/GeneratedAssetSymbols.dia",
+    "index-unit-output-path" : "/BatteryLimiter.build/Debug/BatteryLimiter.build/Objects-normal/x86_64/GeneratedAssetSymbols.o",
+    "llvm-bc" : "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/build/dev/Build/Intermediates.noindex/BatteryLimiter.build/Debug/BatteryLimiter.build/Objects-normal/x86_64/GeneratedAssetSymbols.bc",
+    "object" : "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/build/dev/Build/Intermediates.noindex/BatteryLimiter.build/Debug/BatteryLimiter.build/Objects-normal/x86_64/GeneratedAssetSymbols.o",
+    "swift-dependencies" : "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/build/dev/Build/Intermediates.noindex/BatteryLimiter.build/Debug/BatteryLimiter.build/Objects-normal/x86_64/GeneratedAssetSymbols.swiftdeps",
+    "swiftmodule" : "/Users/mykytagrogul/Documents/GitHub/mac-battery-limiter/build/dev/Build/Intermediates.noindex/BatteryLimiter.build/Debug/BatteryLimiter.build/Objects-normal/x86_64/GeneratedAssetSymbols~partial.swiftmodule"
+  }
+}

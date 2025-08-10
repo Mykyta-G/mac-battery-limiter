@@ -1,0 +1,2 @@
+Target dependency graph (1 target)
+Target 'BatteryLimiter' in project 'BatteryLimiter' (no dependencies)

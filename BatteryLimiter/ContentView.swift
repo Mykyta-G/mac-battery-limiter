@@ -1,50 +1,78 @@
 import SwiftUI
+import UserNotifications
 
 struct ContentView: View {
     @StateObject private var batteryMonitor = BatteryMonitor()
     @State private var showingSettings = false
     
     var body: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 0) {
             // Header
-            HStack {
-                Image(systemName: "battery.100")
-                    .font(.title)
-                    .foregroundColor(.green)
-                
-                Text("Battery Limiter")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                
-                Spacer()
-                
-                Button(action: {
-                    showingSettings.toggle()
-                }) {
-                    Image(systemName: "gear")
-                        .font(.title3)
+            VStack(spacing: 16) {
+                HStack {
+                    Image(systemName: "battery.100")
+                        .font(.title)
+                        .foregroundColor(.green)
+                        .padding(.leading, 4)
+                    
+                    Text("Battery Limiter")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .padding(.leading, 4)
+                    
+                    Spacer()
+                    
+                    Button(action: {
+                        showingSettings.toggle()
+                    }) {
+                        Image(systemName: "gear")
+                            .font(.title3)
+                            .foregroundColor(.secondary)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .padding(.trailing, 4)
                 }
-                .buttonStyle(PlainButtonStyle())
+                
+                // Error Message Display
+                if let errorMessage = batteryMonitor.errorMessage {
+                    HStack(spacing: 8) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundColor(.red)
+                        Text(errorMessage)
+                            .font(.caption)
+                            .foregroundColor(.red)
+                            .multilineTextAlignment(.leading)
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(Color.red.opacity(0.1))
+                    .cornerRadius(8)
+                }
             }
-            .padding(.horizontal)
+            .padding(.horizontal, 20)
+            .padding(.top, 32)
+            .padding(.bottom, 20)
             
             Divider()
+                .padding(.horizontal, 20)
             
-            // Battery Status
-            VStack(spacing: 15) {
+            // Battery Status Section
+            VStack(spacing: 24) {
                 // Battery Level
-                VStack {
+                VStack(spacing: 8) {
                     Text("\(batteryMonitor.batteryLevel)%")
-                        .font(.system(size: 48, weight: .bold, design: .rounded))
+                        .font(.system(size: 56, weight: .bold, design: .rounded))
                         .foregroundColor(batteryColor)
                     
                     Text("Battery Level")
-                        .font(.caption)
+                        .font(.subheadline)
                         .foregroundColor(.secondary)
+                        .fontWeight(.medium)
                 }
+                .padding(.top, 8)
                 
                 // Status Indicators
-                HStack(spacing: 20) {
+                HStack(spacing: 24) {
                     StatusIndicator(
                         icon: batteryMonitor.isCharging ? "bolt.fill" : "bolt.slash",
                         text: batteryMonitor.isCharging ? "Charging" : "Not Charging",
@@ -59,33 +87,40 @@ struct ContentView: View {
                 }
                 
                 // Monitoring Status
-                HStack {
+                HStack(spacing: 8) {
                     Circle()
                         .fill(batteryMonitor.isMonitoring ? Color.green : Color.red)
-                        .frame(width: 8, height: 8)
+                        .frame(width: 10, height: 10)
                     
                     Text(batteryMonitor.isMonitoring ? "Monitoring Active" : "Monitoring Inactive")
-                        .font(.caption)
+                        .font(.subheadline)
                         .foregroundColor(.secondary)
+                        .fontWeight(.medium)
                 }
                 
                 // Last Update Time
                 Text("Last updated: \(timeAgoString(from: batteryMonitor.lastUpdateTime))")
-                    .font(.caption2)
+                    .font(.caption)
                     .foregroundColor(.secondary)
+                    .padding(.top, 4)
             }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 20)
             
             Divider()
+                .padding(.horizontal, 20)
             
-            // Charge Limit
-            VStack(spacing: 10) {
+            // Charge Limit Section
+            VStack(spacing: 16) {
                 HStack {
                     Text("Max Charge Limit")
                         .font(.headline)
+                        .fontWeight(.semibold)
                     Spacer()
                     Text("\(batteryMonitor.maxChargeLimit)%")
                         .font(.headline)
                         .foregroundColor(.blue)
+                        .fontWeight(.bold)
                 }
                 
                 Slider(value: Binding(
@@ -106,22 +141,35 @@ struct ContentView: View {
                 
                 // Charge Limit Status
                 if batteryMonitor.isCharging && batteryMonitor.batteryLevel >= batteryMonitor.maxChargeLimit {
-                    HStack {
+                    HStack(spacing: 8) {
                         Image(systemName: "exclamationmark.triangle.fill")
                             .foregroundColor(.orange)
-                        Text("Charge limit reached! Charging will be stopped.")
-                            .font(.caption)
-                            .foregroundColor(.orange)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Charge limit reached!")
+                                .font(.caption)
+                                .foregroundColor(.orange)
+                                .fontWeight(.semibold)
+                            Text("Charging will be stopped automatically.")
+                                .font(.caption2)
+                                .foregroundColor(.orange)
+                        }
                     }
-                    .padding(.top, 5)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(Color.orange.opacity(0.1))
+                    .cornerRadius(8)
                 }
             }
-            .padding(.horizontal)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 20)
+            
+            Spacer(minLength: 20)
             
             Divider()
+                .padding(.horizontal, 20)
             
-            // Action Buttons
-            HStack(spacing: 15) {
+            // Action Button
+            VStack(spacing: 16) {
                 Button(action: {
                     if batteryMonitor.isMonitoring {
                         batteryMonitor.stopMonitoring()
@@ -129,35 +177,28 @@ struct ContentView: View {
                         batteryMonitor.startMonitoring()
                     }
                 }) {
-                    HStack {
+                    HStack(spacing: 8) {
                         Image(systemName: batteryMonitor.isMonitoring ? "stop.fill" : "play.fill")
-                        Text(batteryMonitor.isMonitoring ? "Stop" : "Start")
+                        Text(batteryMonitor.isMonitoring ? "Stop Monitoring" : "Start Monitoring")
+                            .fontWeight(.semibold)
                     }
                     .frame(maxWidth: .infinity)
+                    .frame(height: 44)
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
-            }
-            .padding(.horizontal)
-            
-            Spacer()
-            
-            // Footer
-            VStack(spacing: 5) {
-                Text("Click the menu bar icon to access this app")
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
                 
-                Text("Updates automatically every 2 seconds")
-                    .font(.caption2)
+                // Footer
+                Text("© 2025 Battery Limiter")
+                    .font(.caption)
                     .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
+                    .padding(.top, 8)
             }
-            .padding(.horizontal)
+            .padding(.horizontal, 20)
+            .padding(.bottom, 32)
         }
-        .padding()
-        .frame(width: 300, height: 450)
+        .frame(width: 320, height: 600)
+        .background(Color(NSColor.controlBackgroundColor))
         .onAppear {
             batteryMonitor.loadSettings()
         }
@@ -197,17 +238,22 @@ struct StatusIndicator: View {
     let color: Color
     
     var body: some View {
-        VStack(spacing: 5) {
+        VStack(spacing: 8) {
             Image(systemName: icon)
                 .font(.title2)
                 .foregroundColor(color)
+                .frame(width: 24, height: 24)
             
             Text(text)
                 .font(.caption)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
+                .fontWeight(.medium)
         }
         .frame(maxWidth: .infinity)
+        .padding(.vertical, 12)
+        .background(Color.secondary.opacity(0.05))
+        .cornerRadius(10)
     }
 }
 

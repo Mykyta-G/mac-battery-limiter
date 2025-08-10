@@ -1,5 +1,6 @@
 import SwiftUI
 import AppKit
+import os.log
 
 @main
 struct BatteryLimiterApp: App {
@@ -16,22 +17,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var statusItem: NSStatusItem?
     var popover: NSPopover?
     var batteryMonitor: BatteryMonitor?
+    private let logger = Logger(subsystem: "com.batterylimiter.app", category: "AppDelegate")
     
     func applicationDidFinishLaunching(_ notification: Notification) {
-        print("App launching...")
+        logger.info("App launching")
         
         // Check if we have accessibility permissions
         let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue(): true]
         let accessEnabled = AXIsProcessTrustedWithOptions(options as CFDictionary)
-        print("Accessibility enabled: \(accessEnabled)")
+        logger.info("Accessibility enabled: \(accessEnabled)")
         
         // Hide the dock icon since this is a menu bar app
         NSApp.setActivationPolicy(.accessory)
-        print("Set activation policy to accessory")
         
         // Create the status item (menu bar icon)
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        print("Created status item")
         
         if let button = statusItem?.button {
             // Create a unique custom icon - use a different battery symbol with custom color
@@ -47,51 +47,33 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             button.isEnabled = true
             button.isHidden = false
             
-            // Force the button to be visible and update
+            // Update the button display
             button.needsDisplay = true
             button.needsLayout = true
             
-            print("Configured status button")
-            print("Button frame: \(button.frame)")
-            print("Button isHidden: \(button.isHidden)")
-            print("Button title: \(button.title)")
-            print("Button image: \(button.image != nil ? "Has image" : "No image")")
+            logger.info("Configured status button")
         } else {
-            print("Failed to get status button")
+            logger.error("Failed to get status button")
         }
         
-        // Force the status item to be visible
+        // Ensure the status item is visible
         statusItem?.isVisible = true
-        print("Status item isVisible: \(statusItem?.isVisible ?? false)")
-        
-        // Also try to force a menu bar update
-        NSStatusBar.system.statusItem(withLength: 0).isVisible = false
-        NSStatusBar.system.statusItem(withLength: 0).isVisible = true
         
         // Create the popover
         popover = NSPopover()
         popover?.contentSize = NSSize(width: 300, height: 400)
         popover?.behavior = .transient
         popover?.contentViewController = NSHostingController(rootView: ContentView())
-        print("Created popover")
         
         // Initialize battery monitor
         batteryMonitor = BatteryMonitor()
         batteryMonitor?.startMonitoring()
-        print("Started battery monitoring")
-        
-        // Start the battery monitoring timer with shorter interval for better responsiveness
-        Timer.scheduledTimer(withTimeInterval: 15.0, repeats: true) { _ in
-            self.batteryMonitor?.checkBatteryStatus()
-        }
-        
-        print("App launch complete")
         
         // Register the app to start at login (only if not already registered)
         if !isRegisteredForLogin() {
             registerForLogin()
         } else {
-            print("App is already registered for login")
+            logger.info("App is already registered for login")
         }
         
         // Register for system notifications
@@ -117,7 +99,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         )
         
         // Show a visible alert to confirm the app is running
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
             let alert = NSAlert()
             alert.messageText = "Battery Limiter is Running!"
             alert.informativeText = "The app will now start automatically when you boot your Mac and continue monitoring even during sleep. Check your menu bar for the battery icon."
@@ -127,30 +109,30 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     @objc func systemWillSleep(_ notification: Notification) {
-        print("System going to sleep - Battery Limiter will continue monitoring")
+        logger.info("System going to sleep - Battery Limiter will continue monitoring")
         // Save current state
         batteryMonitor?.saveSettings()
         
         // Ensure the app stays active during sleep
-        DispatchQueue.main.async {
-            self.batteryMonitor?.prepareForSleep()
+        DispatchQueue.main.async { [weak self] in
+            self?.batteryMonitor?.prepareForSleep()
         }
     }
     
     @objc func systemDidWake(_ notification: Notification) {
-        print("System woke up - Battery Limiter resuming full monitoring")
+        logger.info("System woke up - Battery Limiter resuming full monitoring")
         
         // Resume full monitoring
-        DispatchQueue.main.async {
-            self.batteryMonitor?.resumeFromSleep()
+        DispatchQueue.main.async { [weak self] in
+            self?.batteryMonitor?.resumeFromSleep()
             
             // Check battery status immediately after wake
-            self.batteryMonitor?.checkBatteryStatus()
+            self?.batteryMonitor?.checkBatteryStatus()
         }
     }
     
     @objc func systemWillPowerOff(_ notification: Notification) {
-        print("System powering off - Battery Limiter saving state")
+        logger.info("System powering off - Battery Limiter saving state")
         batteryMonitor?.saveSettings()
     }
     
@@ -217,10 +199,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             try process.run()
             process.waitUntilExit()
             
-            print("Successfully registered for login using LaunchAgent")
+            logger.info("Successfully registered for login using LaunchAgent")
         } catch {
-            print("Failed to register for login: \(error.localizedDescription)")
-            print("You can manually add the app to System Preferences > Users & Groups > Login Items")
+            logger.error("Failed to register for login: \(error.localizedDescription)")
+            logger.info("You can manually add the app to System Preferences > Users & Groups > Login Items")
         }
     }
     
@@ -244,9 +226,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             
             // Remove the plist file
             try FileManager.default.removeItem(atPath: expandedPath)
-            print("Successfully removed from login items")
+            logger.info("Successfully removed from login items")
         } catch {
-            print("Failed to remove from login items: \(error.localizedDescription)")
+            logger.error("Failed to remove from login items: \(error.localizedDescription)")
         }
     }
     
