@@ -70,7 +70,7 @@ echo "   - Double-click BatteryLimiter.app in Applications folder"
 echo "   - Or use: open /Applications/BatteryLimiter.app"
 echo ""
 echo "💡 The app will automatically start at login and run in the background."
-echo "   Look for the orange battery icon in your menu bar!"
+echo "   Look for the battery icon in your menu bar!"
 echo ""
 echo "🔧 To uninstall:"
 echo "   sudo rm -rf /Applications/BatteryLimiter.app"
@@ -123,7 +123,7 @@ Battery Limiter is a macOS app that helps preserve your MacBook's battery health
 - 🚀 **Automatic startup**: Runs automatically when you boot your Mac
 - 🌙 **Sleep mode support**: Continues monitoring even when Mac is asleep
 - 🔋 **Smart charging**: Automatically stops charging at your set limit
-- 📱 **Menu bar access**: Easy access via the orange battery icon in your menu bar
+- 📱 **Menu bar access**: Easy access via the battery icon in your menu bar
 - ⚙️ **Customizable limits**: Set your preferred maximum charge percentage
 
 ## Installation
@@ -141,7 +141,7 @@ Battery Limiter is a macOS app that helps preserve your MacBook's battery health
 
 ## Usage
 - The app runs automatically in the background
-- Look for the orange battery icon in your menu bar
+- Look for the battery icon in your menu bar
 - Click the icon to access settings and battery information
 - The app will automatically start at login
 

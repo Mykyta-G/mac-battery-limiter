@@ -6,7 +6,7 @@ A macOS menu bar application that helps preserve your Mac's battery health by mo
 
 - **Battery Monitoring**: Real-time monitoring of battery level, charging status, and power source
 - **Smart Charging Limits**: Set custom maximum charge limits (20%-100%) to prevent overcharging
-- **Menu Bar Integration**: Easy access from the menu bar with an orange battery icon
+- **Menu Bar Integration**: Easy access from the menu bar with a battery icon
 - **Background Operation**: Continues monitoring even when the app is not actively used
 - **Sleep Mode Support**: Maintains monitoring during system sleep with reduced frequency
 - **Auto-start**: Option to automatically start with your Mac
@@ -69,11 +69,11 @@ cd ..
 
 1. **Run the setup script**: `./run_app.sh` (this handles building, installing, and launching)
 2. **Grant permissions**: When prompted, allow accessibility permissions for battery monitoring
-3. **Find the app**: Look for the orange battery icon in your menu bar (top-right of screen)
+3. **Find the app**: Look for the battery icon in your menu bar (top-right of screen)
 
 ### Daily Use
 
-1. **Menu Bar Access**: Click the orange battery icon in your menu bar
+1. **Menu Bar Access**: Click the battery icon in your menu bar
 2. **Set Charge Limit**: Adjust the slider to your preferred maximum charge level (20%-100%)
 3. **Monitor Status**: View real-time battery information and charging status
 4. **Automatic Operation**: The app runs in the background and notifies you when limits are reached

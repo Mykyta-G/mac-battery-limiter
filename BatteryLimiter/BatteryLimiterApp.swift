@@ -120,7 +120,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             let alert = NSAlert()
             alert.messageText = "Battery Limiter is Running!"
-            alert.informativeText = "The app will now start automatically when you boot your Mac and continue monitoring even during sleep. Check your menu bar for the orange battery icon."
+            alert.informativeText = "The app will now start automatically when you boot your Mac and continue monitoring even during sleep. Check your menu bar for the battery icon."
             alert.addButton(withTitle: "OK")
             alert.runModal()
         }

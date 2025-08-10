@@ -12,7 +12,7 @@ if [ -d "$APP_PATH" ]; then
     # Check if the app is already running
     if pgrep -f "BatteryLimiter" > /dev/null; then
         echo "⚠️  Battery Limiter is already running"
-        echo "💡 You can find it in your menu bar (orange battery icon)"
+        echo "💡 You can find it in your menu bar (battery icon)"
         
         # Bring the app to front if it's running
         osascript -e 'tell application "BatteryLimiter" to activate'
@@ -26,7 +26,7 @@ if [ -d "$APP_PATH" ]; then
         # Check if it's running
         if pgrep -f "BatteryLimiter" > /dev/null; then
             echo "✅ Battery Limiter launched successfully!"
-            echo "💡 Look for the orange battery icon in your menu bar"
+            echo "💡 Look for the battery icon in your menu bar"
         else
             echo "❌ Failed to launch Battery Limiter"
             echo "💡 Check System Preferences > Security & Privacy > Accessibility"
