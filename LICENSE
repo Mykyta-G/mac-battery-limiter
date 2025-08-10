@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2025 Mykyta Grogul
+Copyright (c) 2024 Mykyta G
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -8,6 +8,13 @@ in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+**ATTRIBUTION REQUIREMENT**: Any distribution, modification, or derivative work
+of this Software must prominently display the following attribution:
+"Based on Battery Limiter for Mac by Mykyta G (https://github.com/yourusername/battery-limiter)"
 
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
