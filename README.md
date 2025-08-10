@@ -21,25 +21,69 @@ A macOS menu bar application that helps preserve your Mac's battery health by mo
 
 ## Installation
 
-### From Source
+### Quick Start (Recommended)
 
-1. Clone this repository
-2. Open `BatteryLimiter.xcodeproj` in Xcode
-3. Build and run the project
-4. Grant accessibility permissions when prompted
+The easiest way to get Battery Limiter running:
 
-### Building for Distribution
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/mac-battery-limiter.git
+cd mac-battery-limiter
 
-1. Open the project in Xcode
-2. Select Product → Archive
-3. Follow the distribution process for your target platform
+# Run the automated setup script
+./run_app.sh
+```
+
+This script will automatically:
+1. Check if the app is already built
+2. Build it if needed using Xcode command line tools
+3. Install it to your Applications folder
+4. Launch the app
+
+### Manual Installation
+
+If you prefer step-by-step control:
+
+```bash
+# 1. Build the standalone app
+./build.sh
+
+# 2. Install to Applications folder
+cd BatteryLimiter-Standalone
+./install.sh
+cd ..
+
+# 3. Launch the app
+./launch_battery_limiter.sh
+```
+
+### Requirements
+
+- macOS 14.0 or later
+- Xcode command line tools (for building)
+- Accessibility permissions (granted when first run)
 
 ## Usage
 
-1. **Launch the App**: The app will appear in your menu bar with an orange battery icon
-2. **Set Charge Limit**: Click the menu bar icon and adjust the slider to your preferred maximum charge level
+### First Run
+
+1. **Run the setup script**: `./run_app.sh` (this handles building, installing, and launching)
+2. **Grant permissions**: When prompted, allow accessibility permissions for battery monitoring
+3. **Find the app**: Look for the orange battery icon in your menu bar (top-right of screen)
+
+### Daily Use
+
+1. **Menu Bar Access**: Click the orange battery icon in your menu bar
+2. **Set Charge Limit**: Adjust the slider to your preferred maximum charge level (20%-100%)
 3. **Monitor Status**: View real-time battery information and charging status
-4. **Automatic Operation**: The app will automatically monitor and notify you when limits are reached
+4. **Automatic Operation**: The app runs in the background and notifies you when limits are reached
+
+### App Features
+
+- **Background Monitoring**: Continues working even when not actively used
+- **Sleep Mode Support**: Maintains monitoring during system sleep
+- **Auto-start**: Automatically launches when you log into your Mac
+- **Notifications**: Alerts when battery reaches your set limit
 
 ## Privacy & Permissions
 
@@ -57,6 +101,8 @@ No personal data is collected or transmitted. All monitoring is performed locall
 - Implements LaunchAgent for auto-start functionality
 - Supports both Intel and Apple Silicon Macs
 - Optimized for background operation with minimal resource usage
+- **Command-line build system** with automated scripts for easy deployment
+- **Standalone app distribution** - no Xcode required after initial build
 
 ## Contributing
 
