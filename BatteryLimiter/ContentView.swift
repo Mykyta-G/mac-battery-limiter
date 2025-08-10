@@ -68,6 +68,11 @@ struct ContentView: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
+                
+                // Last Update Time
+                Text("Last updated: \(timeAgoString(from: batteryMonitor.lastUpdateTime))")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
             }
             
             Divider()
@@ -98,6 +103,18 @@ struct ContentView: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
+                
+                // Charge Limit Status
+                if batteryMonitor.isCharging && batteryMonitor.batteryLevel >= batteryMonitor.maxChargeLimit {
+                    HStack {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundColor(.orange)
+                        Text("Charge limit reached! Charging will be stopped.")
+                            .font(.caption)
+                            .foregroundColor(.orange)
+                    }
+                    .padding(.top, 5)
+                }
             }
             .padding(.horizontal)
             
@@ -120,32 +137,27 @@ struct ContentView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
-                
-                Button(action: {
-                    batteryMonitor.checkBatteryStatus()
-                }) {
-                    HStack {
-                        Image(systemName: "arrow.clockwise")
-                        Text("Refresh")
-                    }
-                    .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.bordered)
-                .controlSize(.large)
             }
             .padding(.horizontal)
             
             Spacer()
             
             // Footer
-            Text("Click the menu bar icon to access this app")
-                .font(.caption2)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
+            VStack(spacing: 5) {
+                Text("Click the menu bar icon to access this app")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                
+                Text("Updates automatically every 2 seconds")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+            .padding(.horizontal)
         }
         .padding()
-        .frame(width: 300, height: 400)
+        .frame(width: 300, height: 450)
         .onAppear {
             batteryMonitor.loadSettings()
         }
@@ -161,6 +173,20 @@ struct ContentView: View {
             return .orange
         } else {
             return .green
+        }
+    }
+    
+    private func timeAgoString(from date: Date) -> String {
+        let interval = Date().timeIntervalSince(date)
+        
+        if interval < 60 {
+            return "Just now"
+        } else if interval < 3600 {
+            let minutes = Int(interval / 60)
+            return "\(minutes) min ago"
+        } else {
+            let hours = Int(interval / 3600)
+            return "\(hours) hour\(hours == 1 ? "" : "s") ago"
         }
     }
 }

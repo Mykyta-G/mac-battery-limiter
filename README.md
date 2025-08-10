@@ -27,7 +27,7 @@ The easiest way to get Battery Limiter running:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/mac-battery-limiter.git
+git https://github.com/Mykyta-G/mac-battery-limiter.git
 cd mac-battery-limiter
 
 # Run the automated setup script
