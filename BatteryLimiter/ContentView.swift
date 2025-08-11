@@ -103,6 +103,19 @@ struct ContentView: View {
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .padding(.top, 4)
+                
+                // SMC Status (System Compatibility)
+                HStack(spacing: 8) {
+                    Image(systemName: getSMCStatusIcon())
+                        .foregroundColor(getSMCStatusColor())
+                        .font(.caption)
+                    
+                    Text("System: \(batteryMonitor.smcStatus)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .fontWeight(.medium)
+                }
+                .padding(.top, 4)
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 20)
@@ -228,6 +241,30 @@ struct ContentView: View {
         } else {
             let hours = Int(interval / 3600)
             return "\(hours) hour\(hours == 1 ? "" : "s") ago"
+        }
+    }
+    
+    private func getSMCStatusIcon() -> String {
+        if batteryMonitor.smcStatus.contains("Connected") {
+            return "checkmark.circle.fill"
+        } else if batteryMonitor.smcStatus.contains("Limited") || batteryMonitor.smcStatus.contains("Apple Silicon") {
+            return "exclamationmark.triangle.fill"
+        } else if batteryMonitor.smcStatus.contains("Failed") || batteryMonitor.smcStatus.contains("Not Compatible") {
+            return "xmark.circle.fill"
+        } else {
+            return "questionmark.circle.fill"
+        }
+    }
+    
+    private func getSMCStatusColor() -> Color {
+        if batteryMonitor.smcStatus.contains("Connected") {
+            return .green
+        } else if batteryMonitor.smcStatus.contains("Limited") || batteryMonitor.smcStatus.contains("Apple Silicon") {
+            return .orange
+        } else if batteryMonitor.smcStatus.contains("Failed") || batteryMonitor.smcStatus.contains("Not Compatible") {
+            return .red
+        } else {
+            return .gray
         }
     }
 }

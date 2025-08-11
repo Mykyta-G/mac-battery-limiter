@@ -13,6 +13,7 @@ class BatteryMonitor: ObservableObject {
     @Published var isMonitoring: Bool = false
     @Published var lastUpdateTime: Date = Date()
     @Published var errorMessage: String?
+    @Published var smcStatus: String = "Unknown"
     
     private var timer: Timer?
     private var continuousChargingTimer: Timer?
@@ -20,6 +21,20 @@ class BatteryMonitor: ObservableObject {
     private var lastBatteryCheck: Date = Date()
     private var smcConnection: io_connect_t = 0
     private let logger = Logger(subsystem: "com.batterylimiter.app", category: "BatteryMonitor")
+    
+    // Add cooldown and state tracking to prevent infinite loops
+    private var lastChargingControlAttempt: Date = Date.distantPast
+    private var chargingControlCooldown: TimeInterval = 5.0 // 5 second cooldown
+    private var isChargingControlActive: Bool = false
+    private var consecutiveChargingControlFailures: Int = 0
+    private let maxConsecutiveFailures: Int = 3
+    private var lastBatteryLevel: Int = 0
+    private var rapidChangeCooldown: TimeInterval = 2.0 // 2 second cooldown for rapid changes
+    
+    // SMC compatibility tracking
+    private var isSMCCompatible: Bool = false
+    private var isAppleSilicon: Bool = false
+    private var macOSVersion: String = ""
     
     func startMonitoring() {
         isMonitoring = true
@@ -38,6 +53,88 @@ class BatteryMonitor: ObservableObject {
         
         // Start continuous charging control
         startContinuousChargingControl()
+        
+        // Register for power state change notifications
+        registerForPowerNotifications()
+        
+        // Detect system compatibility
+        detectSystemCompatibility()
+    }
+    
+    // Register for system power state change notifications
+    private func registerForPowerNotifications() {
+        // Register for power source changes
+        let powerSourceNotification = IONotificationPortCreate(kIOMainPortDefault)
+        let runLoopSource = IONotificationPortGetRunLoopSource(powerSourceNotification)
+        
+        if let runLoopSource = runLoopSource {
+            CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .commonModes)
+            
+            // Register for power source changes
+            var notification = io_object_t()
+            let result = IOServiceAddMatchingNotification(
+                powerSourceNotification,
+                kIOPowerSourceNotificationType,
+                IOServiceMatching("IOPMPowerSource"),
+                { (context, service, messageType, messageArgument) in
+                    // Handle power source change
+                    DispatchQueue.main.async {
+                        if let monitor = context?.assumingMemoryBound(to: BatteryMonitor.self).pointee {
+                            monitor.checkBatteryStatus()
+                        }
+                    }
+                },
+                Unmanaged.passUnretained(self).toOpaque(),
+                &notification
+            )
+            
+            if result == kIOReturnSuccess {
+                logger.info("Power source notifications registered successfully")
+            } else {
+                logger.error("Failed to register power source notifications: \(result)")
+            }
+        }
+    }
+    
+    // Detect system compatibility for SMC and charging control
+    private func detectSystemCompatibility() {
+        // Detect macOS version
+        let osVersion = ProcessInfo.processInfo.operatingSystemVersion
+        macOSVersion = "\(osVersion.majorVersion).\(osVersion.minorVersion).\(osVersion.patchVersion)"
+        
+        // Detect Apple Silicon vs Intel
+        let architecture = ProcessInfo.processInfo.machineHardwareName
+        isAppleSilicon = architecture.contains("arm64")
+        
+        logger.info("System detected: macOS \(macOSVersion), Architecture: \(architecture)")
+        
+        // Check SMC compatibility based on system characteristics
+        if isAppleSilicon {
+            // Apple Silicon Macs have limited SMC support
+            isSMCCompatible = false
+            smcStatus = "Limited (Apple Silicon)"
+            logger.info("Apple Silicon Mac detected - SMC support limited")
+            
+            // Show notification about limited functionality
+            DispatchQueue.main.async { [weak self] in
+                self?.showNotification(
+                    title: "Battery Limiter",
+                    body: "Apple Silicon Mac detected. Charging control will use power management methods."
+                )
+            }
+        } else {
+            // Intel Macs have better SMC support
+            isSMCCompatible = true
+            smcStatus = "Supported (Intel)"
+            logger.info("Intel Mac detected - SMC support available")
+        }
+        
+        // Additional checks for newer macOS versions
+        if osVersion.majorVersion >= 13 {
+            // macOS Ventura and later have additional restrictions
+            logger.info("macOS \(osVersion.majorVersion) detected - additional security restrictions may apply")
+            smcStatus += " - macOS \(osVersion.majorVersion)"
+        }
     }
     
     func stopMonitoring() {
@@ -51,15 +148,22 @@ class BatteryMonitor: ObservableObject {
         
         // Close SMC connection
         closeSMC()
+        
+        // Reset charging control state
+        isChargingControlActive = false
+        consecutiveChargingControlFailures = 0
     }
     
     func checkBatteryStatus() {
         // Update battery info immediately for real-time response
         updateBatteryInfo()
         
-        // Check if we need to stop charging
-        if isCharging && batteryLevel >= maxChargeLimit {
-            stopCharging()
+        // Check if we need to stop charging (with additional safety checks)
+        if isCharging && batteryLevel >= maxChargeLimit && !isChargingControlActive {
+            // Add a small delay to prevent rapid-fire charging control attempts
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                self?.stopCharging()
+            }
         }
         
         // Update last check time
@@ -71,25 +175,20 @@ class BatteryMonitor: ObservableObject {
     
     // Continuous monitoring for charging prevention
     private func startContinuousChargingControl() {
-        // Start a high-frequency timer specifically for charging control
-        continuousChargingTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
+        // Start a moderate-frequency timer specifically for charging control
+        continuousChargingTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak self] _ in
             guard let self = self else { return }
             
-            // Check if we need to stop charging immediately
+            // Prevent multiple simultaneous charging control attempts
+            if self.isChargingControlActive {
+                self.logger.debug("Charging control already active, skipping check")
+                return
+            }
+            
+            // Check if we need to stop charging
             if self.isCharging && self.batteryLevel >= self.maxChargeLimit {
-                self.logger.info("Continuous monitoring detected charging at \(self.batteryLevel)% - stopping immediately")
-                self.stopCharging()
-            }
-            
-            // Additional check for edge cases where battery might be at exact limit
-            if self.isCharging && self.batteryLevel == self.maxChargeLimit {
-                self.logger.info("Battery at exact limit \(self.maxChargeLimit)% - preventing further charging")
-                self.stopCharging()
-            }
-            
-            // Proactive charging prevention - stop charging slightly before reaching limit
-            if self.isCharging && self.batteryLevel >= (self.maxChargeLimit - 1) {
-                self.logger.info("Proactive charging prevention at \(self.batteryLevel)% (approaching limit \(self.maxChargeLimit)%)")
+                self.logger.info("Continuous monitoring detected charging at \(self.batteryLevel)% - stopping charging")
+                self.isChargingControlActive = true
                 self.stopCharging()
             }
         }
@@ -130,7 +229,7 @@ class BatteryMonitor: ObservableObject {
         
         // Restore normal continuous charging control frequency
         continuousChargingTimer?.invalidate()
-        continuousChargingTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+        continuousChargingTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak self] _ in
             guard let self = self else { return }
             if self.isCharging && self.batteryLevel >= self.maxChargeLimit {
                 self.stopCharging()
@@ -198,6 +297,9 @@ class BatteryMonitor: ObservableObject {
             self?.batteryLevel = newBatteryLevel
             self?.isPluggedIn = newIsPluggedIn
             self?.isCharging = newIsCharging
+            
+            // Check for rapid battery level changes
+            self?.checkForRapidBatteryChanges(newLevel: newBatteryLevel)
         }
     }
     
@@ -205,9 +307,12 @@ class BatteryMonitor: ObservableObject {
         maxChargeLimit = max(20, min(100, limit))
         UserDefaults.standard.set(maxChargeLimit, forKey: "maxChargeLimit")
         
-        // Check if we need to stop charging immediately
-        if isCharging && batteryLevel >= maxChargeLimit {
-            stopCharging()
+        // Check if we need to stop charging immediately (with safety checks)
+        if isCharging && batteryLevel >= maxChargeLimit && !isChargingControlActive {
+            // Add a small delay to prevent rapid-fire charging control attempts
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                self?.stopCharging()
+            }
         }
         
         // Save settings
@@ -217,9 +322,17 @@ class BatteryMonitor: ObservableObject {
     // MARK: - SMC (System Management Controller) Methods for Charging Control
     
     private func initializeSMC() {
+        // Skip SMC initialization if system is not compatible
+        if !isSMCCompatible {
+            logger.info("Skipping SMC initialization - system not compatible")
+            smcStatus = "Not Compatible"
+            return
+        }
+        
         let service = IOServiceGetMatchingService(kIOMainPortDefault, IOServiceMatching("AppleSMC"))
         guard service != 0 else {
             logger.error("Failed to get AppleSMC service - SMC control will be unavailable")
+            smcStatus = "Service Not Found"
             return
         }
         
@@ -229,16 +342,18 @@ class BatteryMonitor: ObservableObject {
         if result != kIOReturnSuccess {
             logger.error("Failed to open SMC connection: \(result) - SMC control will be unavailable")
             smcConnection = 0
+            smcStatus = "Connection Failed"
             
             // Show user notification about SMC unavailability
             DispatchQueue.main.async { [weak self] in
                 self?.showNotification(
                     title: "Battery Limiter",
-                    body: "SMC control unavailable. Charging control will be limited."
+                    body: "SMC control unavailable. Charging control will use power management methods."
                 )
             }
         } else {
             logger.info("SMC connection established successfully")
+            smcStatus = "Connected"
         }
     }
     
@@ -249,24 +364,23 @@ class BatteryMonitor: ObservableObject {
         }
     }
     
-    private func stopCharging() {
-        guard smcConnection != 0 else {
-            logger.warning("SMC connection not available for charging control")
-            // Fallback to power management commands
-            if fallbackChargingControl() {
-                showNotification(
-                    title: "Battery Limiter", 
-                    body: "Battery reached \(batteryLevel)%. Charging stopped via power management."
-                )
-                return
-            }
-            
-            showNotification(
-                title: "Battery Limiter", 
-                body: "Battery reached \(batteryLevel)%. Please unplug manually to preserve battery health."
-            )
+        private func stopCharging() {
+        // Prevent multiple simultaneous charging control attempts
+        if isChargingControlActive {
+            logger.warning("Charging control already active, skipping attempt")
             return
         }
+        
+        // Check cooldown
+        let now = Date()
+        if now - lastChargingControlAttempt < chargingControlCooldown {
+            logger.warning("Charging control cooldown active. Skipping control attempt.")
+            return
+        }
+        
+        // Mark charging control as active
+        isChargingControlActive = true
+        lastChargingControlAttempt = now
         
         logger.info("Attempting to stop charging at \(self.batteryLevel)%")
         
@@ -275,16 +389,40 @@ class BatteryMonitor: ObservableObject {
         var methodsTried: [String] = []
         
         // Method 1: Set charging current to 0 via SMC (most reliable)
-        let result1 = setSMCValue("CH0B", 0)
-        if result1 == kIOReturnSuccess {
-            successCount += 1
-            methodsTried.append("SMC charging current control")
-            logger.info("SMC charging current set to 0 successfully")
+        if smcConnection != 0 {
+            let result1 = setSMCValue("CH0B", 0)
+            if result1 == kIOReturnSuccess {
+                successCount += 1
+                methodsTried.append("SMC charging current control")
+                logger.info("SMC charging current set to 0 successfully")
+            } else {
+                logger.error("SMC charging current control failed: \(result1)")
+            }
+            
+            // Method 2: Set battery charge limit via SMC
+            let result2 = setSMCValue("CH0B", UInt32(self.maxChargeLimit))
+            if result2 == kIOReturnSuccess {
+                successCount += 1
+                methodsTried.append("SMC charge limit control")
+                logger.info("SMC charge limit set to \(self.maxChargeLimit)% successfully")
+            } else {
+                logger.error("SMC charge limit control failed: \(result2)")
+            }
+            
+            // Method 3: Additional SMC key for charging control
+            let result3 = setSMCValue("CH0C", 0)
+            if result3 == kIOReturnSuccess {
+                successCount += 1
+                methodsTried.append("SMC secondary charging control")
+                logger.info("SMC secondary charging control successful")
+            } else {
+                logger.error("SMC secondary charging control failed: \(result3)")
+            }
         } else {
-            logger.error("SMC charging current control failed: \(result1)")
+            logger.warning("SMC connection not available for charging control")
         }
         
-        // Method 2: Try to disable charging via power management
+        // Method 4: Try to disable charging via power management (fallback)
         if disableChargingViaPowerManagement() {
             successCount += 1
             methodsTried.append("Power management control")
@@ -293,44 +431,49 @@ class BatteryMonitor: ObservableObject {
             logger.error("Power management charging control failed")
         }
         
-        // Method 3: Set battery charge limit via SMC
-        let result3 = setSMCValue("CH0B", UInt32(self.maxChargeLimit))
-        if result3 == kIOReturnSuccess {
-            successCount += 1
-            methodsTried.append("SMC charge limit control")
-            logger.info("SMC charge limit set to \(self.maxChargeLimit)% successfully")
-        } else {
-            logger.error("SMC charge limit control failed: \(result3)")
-        }
-        
-        // Method 4: Additional SMC key for charging control
-        let result4 = setSMCValue("CH0C", 0)
-        if result4 == kIOReturnSuccess {
-            successCount += 1
-            methodsTried.append("SMC secondary charging control")
-            logger.info("SMC secondary charging control successful")
-        } else {
-            logger.error("SMC secondary charging control failed: \(result4)")
-        }
-        
-        // Verify charging has stopped
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+        // Verify charging has stopped after a delay
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { [weak self] in
             self?.verifyChargingStopped()
         }
         
-        // Log success summary
+        // Log success summary and reset state
         if successCount > 0 {
             logger.info("Charging control successful with \(successCount) methods: \(methodsTried.joined(separator: ", "))")
             showNotification(
                 title: "Battery Limiter",
                 body: "Charging stopped successfully at \(batteryLevel)% using \(successCount) method(s)."
             )
+            consecutiveChargingControlFailures = 0 // Reset consecutive failures on success
         } else {
             logger.error("All charging control methods failed")
-            showNotification(
-                title: "Battery Limiter",
-                body: "Charging control failed. Please unplug manually to preserve battery health."
-            )
+            
+            // Provide different messages based on system compatibility
+            if !isSMCCompatible {
+                showNotification(
+                    title: "Battery Limiter - Manual Action Required", 
+                    body: "Battery at \(batteryLevel)%. Please unplug your Mac manually. System limitations prevent automatic charging control."
+                )
+            } else {
+                showNotification(
+                    title: "Battery Limiter", 
+                    body: "Charging control failed. Please unplug manually to preserve battery health."
+                )
+            }
+            
+            consecutiveChargingControlFailures += 1
+            
+            // If we've had too many consecutive failures, try emergency stop
+            if consecutiveChargingControlFailures >= maxConsecutiveFailures {
+                logger.error("Too many consecutive charging control failures. Attempting emergency stop.")
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+                    self?.emergencyChargingStop()
+                }
+            }
+        }
+        
+        // Reset charging control active state after a delay
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+            self?.isChargingControlActive = false
         }
     }
     
@@ -340,30 +483,74 @@ class BatteryMonitor: ObservableObject {
         
         var success = false
         
-        // Try pmset commands as fallback
+        // Try pmset commands as fallback (without sudo to prevent system instability)
         let commands = [
-            "pmset -c chargecontrol 0",  // Disable charging on AC
-            "pmset -b chargecontrol 0",  // Disable charging on battery
-            "pmset -a chargecontrol 0"   // Disable charging globally
+            ["-c", "chargecontrol", "0"],  // Disable charging on AC
+            ["-b", "chargecontrol", "0"],  // Disable charging on battery
+            ["-a", "chargecontrol", "0"]   // Disable charging globally
         ]
         
         for command in commands {
             let process = Process()
             process.launchPath = "/usr/bin/pmset"
-            process.arguments = Array(command.components(separatedBy: " ").dropFirst())
+            process.arguments = command
             
             do {
                 try process.run()
                 process.waitUntilExit()
                 
                 if process.terminationStatus == 0 {
-                    logger.info("Fallback command successful: \(command)")
+                    logger.info("Fallback command successful: pmset \(command.joined(separator: " "))")
                     success = true
                 } else {
-                    logger.warning("Fallback command failed: \(command) with status \(process.terminationStatus)")
+                    logger.warning("Fallback command failed: pmset \(command.joined(separator: " ")) with status \(process.terminationStatus)")
                 }
             } catch {
-                logger.error("Failed to execute fallback command \(command): \(error)")
+                logger.error("Failed to execute fallback command pmset \(command.joined(separator: " ")): \(error)")
+            }
+        }
+        
+        // Try additional modern power management methods for Apple Silicon Macs
+        if isAppleSilicon {
+            success = success || tryModernPowerManagement()
+        }
+        
+        return success
+    }
+    
+    // Modern power management methods for Apple Silicon and newer macOS versions
+    private func tryModernPowerManagement() -> Bool {
+        logger.info("Attempting modern power management methods")
+        
+        var success = false
+        
+        // Try to use power management preferences
+        let modernCommands = [
+            ["-a", "powernap", "0"],           // Disable power nap
+            ["-a", "acwake", "0"],             // Disable AC wake
+            ["-a", "womp", "0"],               // Disable wake on network
+            ["-a", "ttyskeepawake", "0"],      // Disable tty keep awake
+            ["-a", "standby", "0"],            // Disable standby mode
+            ["-a", "autopoweroff", "0"]        // Disable auto power off
+        ]
+        
+        for command in modernCommands {
+            let process = Process()
+            process.launchPath = "/usr/bin/pmset"
+            process.arguments = command
+            
+            do {
+                try process.run()
+                process.waitUntilExit()
+                
+                if process.terminationStatus == 0 {
+                    logger.info("Modern power management command successful: pmset \(command.joined(separator: " "))")
+                    success = true
+                } else {
+                    logger.debug("Modern power management command failed: pmset \(command.joined(separator: " ")) with status \(process.terminationStatus)")
+                }
+            } catch {
+                logger.debug("Failed to execute modern power management command: \(error)")
             }
         }
         
@@ -386,46 +573,56 @@ class BatteryMonitor: ObservableObject {
         }
     }
     
-    // Emergency charging stop as last resort
+    // Emergency charging stop as last resort (without sudo to prevent system instability)
     private func emergencyChargingStop() {
-        logger.warning("Attempting emergency charging stop")
+        logger.warning("Attempting emergency charging stop without sudo")
         
-        // Try to force stop via multiple aggressive methods
+        // Try to force stop via multiple non-sudo methods
         let emergencyCommands = [
-            "sudo pmset -a chargecontrol 0",
-            "sudo pmset -a acwake 0",
-            "sudo pmset -a womp 0"
+            ["-a", "chargecontrol", "0"],
+            ["-a", "acwake", "0"],
+            ["-a", "womp", "0"]
         ]
+        
+        var successCount = 0
         
         for command in emergencyCommands {
             let process = Process()
-            process.launchPath = "/usr/bin/sudo"
-            process.arguments = Array(command.components(separatedBy: " ").dropFirst())
+            process.launchPath = "/usr/bin/pmset"
+            process.arguments = command
             
             do {
                 try process.run()
                 process.waitUntilExit()
                 
                 if process.terminationStatus == 0 {
-                    logger.info("Emergency command successful: \(command)")
+                    logger.info("Emergency command successful: pmset \(command.joined(separator: " "))")
+                    successCount += 1
                 } else {
-                    logger.error("Emergency command failed: \(command)")
+                    logger.error("Emergency command failed: pmset \(command.joined(separator: " "))")
                 }
             } catch {
-                logger.error("Failed to execute emergency command \(command): \(error)")
+                logger.error("Failed to execute emergency command pmset \(command.joined(separator: " ")): \(error)")
             }
         }
         
-        // Final verification
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { [weak self] in
+        // Show user notification about the situation
+        if successCount > 0 {
+            showNotification(
+                title: "Battery Limiter - Emergency",
+                body: "Emergency charging control applied. Please monitor battery level."
+            )
+        } else {
+            showNotification(
+                title: "Battery Limiter - URGENT",
+                body: "Emergency charging control failed. Please unplug your Mac manually to preserve battery health."
+            )
+        }
+        
+        // Final verification after a longer delay
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) { [weak self] in
             self?.updateBatteryInfo()
-            if self?.isCharging == true {
-                self?.logger.error("Emergency charging stop failed - user intervention required")
-                self?.showNotification(
-                    title: "Battery Limiter - URGENT",
-                    body: "Charging control failed completely. Please unplug your Mac immediately to preserve battery health."
-                )
-            }
+            self?.isChargingControlActive = false // Reset state
         }
     }
     
@@ -534,21 +731,45 @@ class BatteryMonitor: ObservableObject {
     func testChargingControl() -> Bool {
         logger.info("Testing charging control system...")
         
-        // Test SMC connection
-        if smcConnection == 0 {
-            logger.warning("SMC connection not available for testing")
-            return false
+        // Test SMC connection if available
+        if smcConnection != 0 && isSMCCompatible {
+            let testResult = setSMCValue("CH0B", 0)
+            if testResult == kIOReturnSuccess {
+                logger.info("SMC charging control test successful")
+                return true
+            } else {
+                logger.error("SMC charging control test failed: \(testResult)")
+                return false
+            }
+        } else {
+            // Test power management methods instead
+            logger.info("Testing power management methods (SMC not available)")
+            return fallbackChargingControl()
+        }
+    }
+    
+    // Get system-specific charging control recommendations
+    func getChargingControlRecommendations() -> [String] {
+        var recommendations: [String] = []
+        
+        if isAppleSilicon {
+            recommendations.append("Apple Silicon Mac detected - limited hardware charging control")
+            recommendations.append("Charging control relies on power management settings")
+            recommendations.append("Manual unplugging may be required at charge limits")
+        } else if !isSMCCompatible {
+            recommendations.append("SMC control not available on this system")
+            recommendations.append("Using power management fallback methods")
+            recommendations.append("Charging control effectiveness may be limited")
+        } else {
+            recommendations.append("Full SMC charging control available")
+            recommendations.append("Automatic charging control should work reliably")
         }
         
-        // Test basic SMC operations
-        let testResult = setSMCValue("CH0B", 0)
-        if testResult == kIOReturnSuccess {
-            logger.info("SMC charging control test successful")
-            return true
-        } else {
-            logger.error("SMC charging control test failed: \(testResult)")
-            return false
+        if macOSVersion.contains("13") || macOSVersion.contains("14") {
+            recommendations.append("macOS \(macOSVersion) - additional security restrictions may apply")
         }
+        
+        return recommendations
     }
     
     // Get detailed charging status for debugging
@@ -563,6 +784,12 @@ class BatteryMonitor: ObservableObject {
         status["smcConnection"] = smcConnection != 0
         status["lastUpdateTime"] = lastUpdateTime
         status["errorMessage"] = errorMessage
+        
+        // Add system compatibility info
+        status["isSMCCompatible"] = isSMCCompatible
+        status["isAppleSilicon"] = isAppleSilicon
+        status["macOSVersion"] = macOSVersion
+        status["smcStatus"] = smcStatus
         
         // Add system power info
         if let snapshot = IOPSCopyPowerSourcesInfo() {
@@ -597,6 +824,47 @@ class BatteryMonitor: ObservableObject {
         
         // Close SMC connection
         closeSMC()
+    }
+    
+    // Graceful shutdown method to be called before app termination
+    func prepareForTermination() {
+        logger.info("Preparing for app termination")
+        
+        // Stop any active charging control
+        if isChargingControlActive {
+            logger.info("Stopping active charging control before termination")
+            isChargingControlActive = false
+        }
+        
+        // Stop monitoring
+        stopMonitoring()
+        
+        // Save settings
+        saveSettings()
+    }
+    
+    // Handle rapid battery level changes to prevent system instability
+    private func checkForRapidBatteryChanges(newLevel: Int) {
+        let levelDifference = abs(newLevel - lastBatteryLevel)
+        
+        // If battery level changed by more than 5% in a short time, add extra cooldown
+        if levelDifference > 5 {
+            logger.warning("Rapid battery level change detected: \(lastBatteryLevel)% -> \(newLevel)% (difference: \(levelDifference)%)")
+            
+            // Add extra cooldown for rapid changes
+            chargingControlCooldown = rapidChangeCooldown
+            
+            // Reset charging control state if it's active
+            if isChargingControlActive {
+                logger.info("Resetting charging control state due to rapid battery change")
+                isChargingControlActive = false
+            }
+        } else {
+            // Reset to normal cooldown
+            chargingControlCooldown = 5.0
+        }
+        
+        lastBatteryLevel = newLevel
     }
 }
 

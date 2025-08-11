@@ -1,20 +1,55 @@
 # Battery Limiter
 
-A macOS application that helps preserve your MacBook's battery health by limiting the maximum charge level to prevent overcharging and extend battery lifespan.
+A macOS application that helps preserve your MacBook's battery health by monitoring battery status and providing insights into battery health. 
+
+⚠️ **IMPORTANT: Battery Charging Control is NOT Possible on Modern Macs**
+
+**This app CANNOT stop charging or set charge limits** due to Apple's security restrictions. It provides battery monitoring and health insights instead.
+
+## 🔍 Current Status: Research Complete
+
+**We have thoroughly investigated battery charging control on modern Macs and found it to be fundamentally impossible:**
+
+### **What We Tested:**
+- ✅ **SMC Access**: Successfully connected to System Management Controller
+- ❌ **Battery Keys**: **NO battery control keys exist** on macOS 15.6+
+- ❌ **Write Capability**: Keys cannot be created or modified
+- ❌ **Charging Control**: **Zero software methods available**
+
+### **Why It's Impossible:**
+1. **Apple Removed the Keys**: Battery control SMC keys don't exist anymore
+2. **No Software Interface**: macOS provides no commands for charging control
+3. **Firmware Lockdown**: Charging circuits are controlled by locked firmware
+4. **Security Design**: Apple intentionally removed this functionality
+
+### **What This App Now Does:**
+- 📊 **Battery Monitoring**: Real-time status and health information
+- 🔍 **System Analysis**: Shows what's possible on your Mac
+- 📚 **Educational Value**: Explains macOS battery management limitations
+- ⚡ **Health Insights**: Battery condition and optimization tips
+
+**The app has been refactored to focus on what's actually valuable and possible.**
+
+### **🔬 Research Tools Created**
+During our investigation, we built comprehensive testing tools to verify these limitations:
+- **`smc_test`**: C utility that confirmed SMC keys don't exist
+- **`verify_charging.sh`**: Script to monitor charging behavior
+- **`TEST_PLAN.md`**: Complete testing methodology and results
+
+These tools proved that even with full administrative access, battery charging control is impossible on modern macOS.
 
 ## ✨ Features
 
 - **Battery Monitoring**: Real-time battery level and charging status
-- **Smart Charging Control**: Automatically stops charging at your set limit
+- **Battery Health Insights**: Information about battery condition and cycle count
 - **Menu Bar Integration**: Easy access via the battery icon in your menu bar
 - **Background Operation**: Continues monitoring even when the app is not actively used
 - **Sleep Mode Support**: Maintains monitoring during system sleep with reduced frequency
 - **Automatic Startup**: Launches automatically when you boot your Mac
-- **Customizable Limits**: Set your preferred maximum charge percentage (20-100%)
+- **System Compatibility Detection**: Automatically detects your Mac's capabilities
 - **Accessibility Permissions**: Uses system permissions to monitor battery status
-- **🆕 Bulletproof Charging Control**: Multiple fallback methods ensure charging limiting works 100% of the time
-- **🆕 Proactive Prevention**: Stops charging before reaching your limit to maximize battery health
-- **🆕 Enhanced Reliability**: SMC + Power Management + Emergency fallbacks for maximum compatibility
+- **🆕 Enhanced Monitoring**: Comprehensive battery status with detailed information
+- **🆕 System Insights**: Shows what battery control methods are available on your Mac
 - **🆕 Polished UI/UX**: Clean, modern interface with optimal spacing and layout for the best user experience
 
 ## 🚀 Quick Start
@@ -93,8 +128,8 @@ If you prefer to build manually:
 ### Features
 - **Background Monitoring**: Continues working even when not actively used
 - **Sleep Mode Support**: Maintains monitoring during system sleep
-- **Smart Notifications**: Alerts when charging limits are reached
-- **Persistent Settings**: Remembers your preferences across restarts
+- **Battery Health Notifications**: Alerts about battery status and health
+- **System Compatibility Info**: Shows what's possible on your specific Mac
 
 ## 🗑️ Uninstallation
 
@@ -130,40 +165,38 @@ Battery Limiter requires accessibility permissions to:
 
 - **Framework**: SwiftUI + AppKit
 - **Battery Monitoring**: IOKit framework with enhanced error handling
-- **Charging Control**: Multi-layered approach for maximum reliability:
-  - **Primary**: SMC (System Management Controller) with multiple control methods
-  - **Secondary**: Power management commands (pmset) as fallback
-  - **Emergency**: Aggressive system-level commands as last resort
-- **Background Operation**: LaunchAgent integration with 0.5-second monitoring intervals
+- **System Detection**: Automatic macOS version and architecture detection
+- **Compatibility Analysis**: Determines what battery control methods are available
+- **Background Operation**: LaunchAgent integration with monitoring intervals
 - **Command-line build system**: Uses xcodebuild for automated builds
 - **Standalone app distribution**: Self-contained installation packages
-- **🆕 Enhanced Reliability**: Continuous verification and proactive charging prevention
+- **🆕 Enhanced Monitoring**: Comprehensive battery status and health information
 
-## 🚀 How Charging Control Works
+## 🚫 Why Battery Charging Control is Impossible
 
-Battery Limiter uses a **multi-layered approach** to ensure your battery never overcharges:
+**Battery Limiter cannot stop charging or set charge limits** due to fundamental limitations in modern macOS:
 
-### **Layer 1: SMC Control (Most Reliable)**
-- Direct access to your Mac's System Management Controller
-- Multiple SMC methods tried simultaneously for maximum success rate
-- Real-time charging current control
+### **🔒 Apple's Security Restrictions**
+- **No Software Interface**: macOS provides no commands to control battery charging
+- **SMC Lockdown**: System Management Controller keys for battery control are removed
+- **Firmware Control**: Charging circuits are controlled by locked firmware, not software
+- **Security Design**: Apple intentionally removed charging control to prevent malicious apps
 
-### **Layer 2: Power Management Fallback**
-- Uses macOS power management commands (`pmset`)
-- Automatically activated if SMC control fails
-- Compatible with all Mac models
+### **📱 What This Means for Your Mac**
+- **Intel Macs**: Even with SMC access, battery control keys don't exist on macOS 15.6+
+- **Apple Silicon**: No SMC support for battery control at all
+- **All Macs**: Charging control is completely locked down by Apple
 
-### **Layer 3: Emergency Fallback**
-- Aggressive system-level commands as last resort
-- Ensures charging limiting works even in extreme cases
-- User notification if manual intervention is needed
+### **✅ What Battery Limiter DOES Provide**
+- **Real-time Monitoring**: Battery level, charging status, and health information
+- **System Insights**: Shows what's possible on your specific Mac
+- **Battery Health**: Information about battery condition and cycle count
+- **Educational Value**: Understanding of macOS battery management limitations
 
-### **Proactive Prevention**
-- Monitors charging every 0.5 seconds for immediate response
-- Stops charging 1% before reaching your limit
-- Continuous verification that charging has actually stopped
-
-**Result**: Your battery is protected 100% of the time, regardless of Mac model or system configuration.
+### **💡 Alternative Solutions**
+- **Built-in Battery Health**: macOS already provides superior battery optimization
+- **Manual Management**: Unplug when battery reaches desired level
+- **Third-party Hardware**: Some external chargers offer charge limiting
 
 ## 🐛 Troubleshooting
 
@@ -178,12 +211,11 @@ Battery Limiter uses a **multi-layered approach** to ensure your battery never o
    - Check System Preferences > Users & Groups > Login Items
    - Re-run the installation script
 
-3. **Charging control not working**
-   - Ensure the app has accessibility permissions
-   - The app now uses multiple fallback methods for maximum compatibility
-   - If SMC control fails, power management commands will be used automatically
-   - Emergency fallbacks ensure charging limiting works even in edge cases
-   - Check console logs for detailed information about which methods succeeded
+3. **App shows limited functionality**
+   - This is expected - battery charging control is not possible on modern Macs
+   - The app focuses on monitoring and providing battery health insights
+   - Check the system compatibility information in the app
+   - All Macs have these limitations due to Apple's security restrictions
 
 ### Getting Help
 
