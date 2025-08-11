@@ -22,20 +22,6 @@ A macOS application that helps preserve your MacBook's battery health by monitor
 3. **Firmware Lockdown**: Charging circuits are controlled by locked firmware
 4. **Security Design**: Apple intentionally removed this functionality
 
-### **What This App Now Does:**
-- 📊 **Battery Monitoring**: Real-time status and health information
-- 🔍 **System Analysis**: Shows what's possible on your Mac
-- 📚 **Educational Value**: Explains macOS battery management limitations
-- ⚡ **Health Insights**: Battery condition and optimization tips
-
-**The app has been refactored to focus on what's actually valuable and possible.**
-
-### **🔬 Research Tools Created**
-During our investigation, we built comprehensive testing tools to verify these limitations:
-- **`smc_test`**: C utility that confirmed SMC keys don't exist
-- **`verify_charging.sh`**: Script to monitor charging behavior
-- **`TEST_PLAN.md`**: Complete testing methodology and results
-
 These tools proved that even with full administrative access, battery charging control is impossible on modern macOS.
 
 ## ✨ Features
@@ -186,17 +172,6 @@ Battery Limiter requires accessibility permissions to:
 - **Intel Macs**: Even with SMC access, battery control keys don't exist on macOS 15.6+
 - **Apple Silicon**: No SMC support for battery control at all
 - **All Macs**: Charging control is completely locked down by Apple
-
-### **✅ What Battery Limiter DOES Provide**
-- **Real-time Monitoring**: Battery level, charging status, and health information
-- **System Insights**: Shows what's possible on your specific Mac
-- **Battery Health**: Information about battery condition and cycle count
-- **Educational Value**: Understanding of macOS battery management limitations
-
-### **💡 Alternative Solutions**
-- **Built-in Battery Health**: macOS already provides superior battery optimization
-- **Manual Management**: Unplug when battery reaches desired level
-- **Third-party Hardware**: Some external chargers offer charge limiting
 
 ## 🐛 Troubleshooting
 
